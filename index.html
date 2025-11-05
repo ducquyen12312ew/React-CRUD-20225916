@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Người dùng</title>
-    <!-- Thềm thư viện -->
+    
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -26,7 +26,76 @@
         
         //add user
         function AddUser({ onAdd }) {
-            return <button>Thêm người dùng</button>;
+            const [adding, setAdding] = React.useState(false);
+            const [user, setUser] = React.useState({
+                name: "", username: "", email: "",
+                address: { street: "", suite: "", city: "" },
+                phone: "", website: ""
+            });
+            
+            const handleChange = (e) => {
+                const { id, value } = e.target;
+                if (["street", "suite", "city"].includes(id)) {
+                    setUser({ ...user, address: { ...user.address, [id]: value } });
+                } else {
+                    setUser({ ...user, [id]: value });
+                }
+            };
+            
+            const handleAdd = () => {
+                if (user.name === "" || user.username === "") {
+                    alert("Vui lòng nhập Name và Username!");
+                    return;
+                }
+                onAdd(user);
+                setUser({ name: "", username: "", email: "", address: { street: "", suite: "", city: "" }, phone: "", website: "" });
+                setAdding(false);
+            };
+            
+            return (
+                <div>
+                    <button onClick={() => setAdding(true)}>Thêm người dùng</button>
+                    {adding && (
+                        <div>
+                            <h3>Thêm người dùng</h3>
+                            <div>
+                                <label>Name: </label>
+                                <input id="name" type="text" value={user.name} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label>Username: </label>
+                                <input id="username" type="text" value={user.username} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label>Email: </label>
+                                <input id="email" type="text" value={user.email} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label>Street: </label>
+                                <input id="street" type="text" value={user.address.street} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label>Suite: </label>
+                                <input id="suite" type="text" value={user.address.suite} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label>City: </label>
+                                <input id="city" type="text" value={user.address.city} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label>Phone: </label>
+                                <input id="phone" type="text" value={user.phone} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label>Website: </label>
+                                <input id="website" type="text" value={user.website} onChange={handleChange} />
+                            </div>
+                            <button onClick={handleAdd}>Lưu</button>
+                            <button onClick={() => setAdding(false)}>Hủy</button>
+                        </div>
+                    )}
+                </div>
+            );
         }
         
         //result table
@@ -43,6 +112,14 @@
                         setLoading(false); 
                     });
             }, []);
+            
+            //add new user
+            React.useEffect(() => {
+                if (user) {
+                    setUsers((prev) => [...prev, { ...user, id: prev.length + 1 }]);
+                    onAdded();
+                }
+            }, [user]);
             
             //filter users
             const filteredUsers = users.filter(
