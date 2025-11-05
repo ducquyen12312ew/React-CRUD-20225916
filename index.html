@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Người dùng</title>
-    <!--Thêm thư viện-->
+    
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -26,29 +26,40 @@
         
         //add user
         function AddUser({ onAdd }) {
+            //state to show/hide form
             const [adding, setAdding] = React.useState(false);
+            //state for user form data
             const [user, setUser] = React.useState({
                 name: "", username: "", email: "",
                 address: { street: "", suite: "", city: "" },
                 phone: "", website: ""
             });
             
+            //handle input change
             const handleChange = (e) => {
                 const { id, value } = e.target;
+                //check if field is nested in address
                 if (["street", "suite", "city"].includes(id)) {
+                    //update nested address field
                     setUser({ ...user, address: { ...user.address, [id]: value } });
                 } else {
+                    //update normal field
                     setUser({ ...user, [id]: value });
                 }
             };
             
+            //handle add user
             const handleAdd = () => {
+                //validate required fields
                 if (user.name === "" || user.username === "") {
                     alert("Vui lòng nhập Name và Username!");
                     return;
                 }
+                //send user data to parent
                 onAdd(user);
+                //reset form
                 setUser({ name: "", username: "", email: "", address: { street: "", suite: "", city: "" }, phone: "", website: "" });
+                //close form
                 setAdding(false);
             };
             
@@ -102,9 +113,10 @@
         function ResultTable({ keyword, user, onAdded }) {
             const [users, setUsers] = React.useState([]);
             const [loading, setLoading] = React.useState(true);
+            //state for editing user
             const [editing, setEditing] = React.useState(null);
             
-            //load data
+            //load data from api
             React.useEffect(() => {
                 fetch("https://jsonplaceholder.typicode.com/users")
                     .then(res => res.json())
@@ -114,7 +126,7 @@
                     });
             }, []);
             
-            //add new user
+            //listen for new user and add to list
             React.useEffect(() => {
                 if (user) {
                     setUsers((prev) => [...prev, { ...user, id: prev.length + 1 }]);
@@ -122,27 +134,39 @@
                 }
             }, [user]);
             
-            //edit user
+            //deep copy user to editing state
             function editUser(user) {
+                //copy user and nested address object
                 setEditing({ ...user, address: { ...user.address } });
             }
             
-            //handle edit change
+            //handle input change in edit form
             function handleEditChange(field, value) {
+                //check if field is nested in address
                 if (["street", "suite", "city"].includes(field)) {
+                    //update nested address field
                     setEditing({ ...editing, address: { ...editing.address, [field]: value } });
                 } else {
+                    //update normal field
                     setEditing({ ...editing, [field]: value });
                 }
             }
             
-            //save user
+            //save edited user
             function saveUser() {
+                //find user by id and replace with edited data
                 setUsers(prev => prev.map(u => u.id === editing.id ? editing : u));
+                //close edit form
                 setEditing(null);
             }
             
-            //filter users
+            //remove user
+            function removeUser(id) {
+                //filter out user with matching id
+                setUsers((prev) => prev.filter((u) => u.id != id));
+            }
+            
+            //filter users by keyword
             const filteredUsers = users.filter(
                 (u) =>
                     u.name.toLowerCase().includes(keyword.toLowerCase()) ||
@@ -214,7 +238,7 @@
                                     <td>{u.address.city}</td>
                                     <td>
                                         <button onClick={() => editUser(u)}>Sửa</button>
-                                        <button>Xóa</button>
+                                        <button onClick={() => removeUser(u.id)}>Xóa</button>
                                     </td>
                                 </tr>
                             ))}
