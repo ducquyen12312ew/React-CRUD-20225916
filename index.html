@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Người dùng</title>
+    <title>Quản lý Người dùng - CRUD hoàn chỉnh</title>
     
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- linkcss -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="root"></div>
     
     <script type="text/babel">
-        //search form
+        //search form component
         function SearchForm({ onChangeValue }) {
             return (
                 <input
@@ -27,11 +26,11 @@
             );
         }
         
-        //add user
+        //add user component
         function AddUser({ onAdd }) {
-            //state to show/hide form
+            //state to show/hide modal
             const [adding, setAdding] = React.useState(false);
-            //state for user form data
+            //state for form data
             const [user, setUser] = React.useState({
                 name: "", username: "", email: "",
                 address: { street: "", suite: "", city: "" },
@@ -41,28 +40,25 @@
             //handle input change
             const handleChange = (e) => {
                 const { id, value } = e.target;
-                //check if field is nested in address
+                //nested state for address fields
                 if (["street", "suite", "city"].includes(id)) {
-                    //update nested address field
                     setUser({ ...user, address: { ...user.address, [id]: value } });
                 } else {
-                    //update normal field
                     setUser({ ...user, [id]: value });
                 }
             };
             
-            //handle add user
+            //handle add button
             const handleAdd = () => {
-                //validate required fields
+                //validation
                 if (user.name === "" || user.username === "") {
                     alert("Vui lòng nhập Name và Username!");
                     return;
                 }
-                //send user data to parent
+                //send data to parent
                 onAdd(user);
                 //reset form
                 setUser({ name: "", username: "", email: "", address: { street: "", suite: "", city: "" }, phone: "", website: "" });
-                //close form
                 setAdding(false);
             };
             
@@ -75,35 +71,35 @@
                             <div className="modal-content">
                                 <h3>Thêm người dùng</h3>
                                 <div>
-                                    <label>Name: </label>
+                                    <label>Name:</label>
                                     <input id="name" type="text" value={user.name} onChange={handleChange} />
                                 </div>
                                 <div>
-                                    <label>Username: </label>
+                                    <label>Username:</label>
                                     <input id="username" type="text" value={user.username} onChange={handleChange} />
                                 </div>
                                 <div>
-                                    <label>Email: </label>
+                                    <label>Email:</label>
                                     <input id="email" type="text" value={user.email} onChange={handleChange} />
                                 </div>
                                 <div>
-                                    <label>Street: </label>
+                                    <label>Street:</label>
                                     <input id="street" type="text" value={user.address.street} onChange={handleChange} />
                                 </div>
                                 <div>
-                                    <label>Suite: </label>
+                                    <label>Suite:</label>
                                     <input id="suite" type="text" value={user.address.suite} onChange={handleChange} />
                                 </div>
                                 <div>
-                                    <label>City: </label>
+                                    <label>City:</label>
                                     <input id="city" type="text" value={user.address.city} onChange={handleChange} />
                                 </div>
                                 <div>
-                                    <label>Phone: </label>
+                                    <label>Phone:</label>
                                     <input id="phone" type="text" value={user.phone} onChange={handleChange} />
                                 </div>
                                 <div>
-                                    <label>Website: </label>
+                                    <label>Website:</label>
                                     <input id="website" type="text" value={user.website} onChange={handleChange} />
                                 </div>
                                 <button onClick={handleAdd}>Lưu</button>
@@ -115,11 +111,10 @@
             );
         }
         
-        //result table
+        //result table component
         function ResultTable({ keyword, user, onAdded }) {
             const [users, setUsers] = React.useState([]);
             const [loading, setLoading] = React.useState(true);
-            //state for editing user
             const [editing, setEditing] = React.useState(null);
             
             //load data from api
@@ -132,7 +127,7 @@
                     });
             }, []);
             
-            //listen for new user and add to list
+            //add new user to list
             React.useEffect(() => {
                 if (user) {
                     setUsers((prev) => [...prev, { ...user, id: prev.length + 1 }]);
@@ -140,35 +135,28 @@
                 }
             }, [user]);
             
-            //deep copy user to editing state
+            //edit user - deep copy
             function editUser(user) {
-                //copy user and nested address object
                 setEditing({ ...user, address: { ...user.address } });
             }
             
-            //handle input change in edit form
+            //handle edit form change
             function handleEditChange(field, value) {
-                //check if field is nested in address
                 if (["street", "suite", "city"].includes(field)) {
-                    //update nested address field
                     setEditing({ ...editing, address: { ...editing.address, [field]: value } });
                 } else {
-                    //update normal field
                     setEditing({ ...editing, [field]: value });
                 }
             }
             
             //save edited user
             function saveUser() {
-                //find user by id and replace with edited data
                 setUsers(prev => prev.map(u => u.id === editing.id ? editing : u));
-                //close edit form
                 setEditing(null);
             }
             
             //remove user
             function removeUser(id) {
-                //filter out user with matching id
                 setUsers((prev) => prev.filter((u) => u.id != id));
             }
             
@@ -188,35 +176,35 @@
                             <div className="modal-content">
                                 <h3>Sửa người dùng</h3>
                                 <div>
-                                    <label>Name: </label>
+                                    <label>Name:</label>
                                     <input type="text" value={editing.name} onChange={(e) => handleEditChange("name", e.target.value)} />
                                 </div>
                                 <div>
-                                    <label>Username: </label>
+                                    <label>Username:</label>
                                     <input type="text" value={editing.username} onChange={(e) => handleEditChange("username", e.target.value)} />
                                 </div>
                                 <div>
-                                    <label>Email: </label>
+                                    <label>Email:</label>
                                     <input type="text" value={editing.email} onChange={(e) => handleEditChange("email", e.target.value)} />
                                 </div>
                                 <div>
-                                    <label>Street: </label>
+                                    <label>Street:</label>
                                     <input type="text" value={editing.address.street} onChange={(e) => handleEditChange("street", e.target.value)} />
                                 </div>
                                 <div>
-                                    <label>Suite: </label>
+                                    <label>Suite:</label>
                                     <input type="text" value={editing.address.suite} onChange={(e) => handleEditChange("suite", e.target.value)} />
                                 </div>
                                 <div>
-                                    <label>City: </label>
+                                    <label>City:</label>
                                     <input type="text" value={editing.address.city} onChange={(e) => handleEditChange("city", e.target.value)} />
                                 </div>
                                 <div>
-                                    <label>Phone: </label>
+                                    <label>Phone:</label>
                                     <input type="text" value={editing.phone} onChange={(e) => handleEditChange("phone", e.target.value)} />
                                 </div>
                                 <div>
-                                    <label>Website: </label>
+                                    <label>Website:</label>
                                     <input type="text" value={editing.website} onChange={(e) => handleEditChange("website", e.target.value)} />
                                 </div>
                                 <button onClick={saveUser}>Lưu</button>
@@ -256,14 +244,15 @@
             );
         }
         
-        //app
+        //main app component
         function App() {
+            //state lifting: manage state in parent
             const [kw, setKeyword] = React.useState("");
             const [newUser, setNewUser] = React.useState(null);
             
             return (
                 <div>
-                    <h1>Quản lý người dùng</h1>
+                    <h1>Quản lý Người dùng</h1>
                     <SearchForm onChangeValue={setKeyword} />
                     <AddUser onAdd={setNewUser} />
                     <ResultTable keyword={kw} user={newUser} onAdded={() => setNewUser(null)} />
@@ -271,7 +260,7 @@
             );
         }
         
-        //render
+        //render app
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
